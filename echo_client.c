@@ -53,20 +53,21 @@ int main(int argc, char**argv)
   // if(!strcmp(message[i],"q\n")) break;
   // send(sock, message[i], strlen(message[i]), 0);
   //
-  // while()
-  // {
-  //   message[str_len] = 0;
-  //   printf("서버로부터 전송된 메시지 : %s \n",message);
-  // }
   // 메시지 수신,출력
-  while((str_len = recv(sock, message, BUFSIZE, 0)) != 0)
+  // str_len = recv(sock, message, BUFSIZE, 0);
+  // message[str_len] = 0;
+  // printf("서버로부터 전송된 메시지 : %s \n",message);
+  while(1)
   {
-    message[str_len] = 0;
-    printf("서버로부터 전송된 메시지 : %s \n",message);
+
     fputs("전송할 메시지를 입력하세요(q to quit) : ",stdout);
     fgets(message,BUFSIZE, stdin);
     if(!strcmp(message,"q\n")) break;
     send(sock, message, strlen(message), 0);
+
+    str_len = recv(sock, message, BUFSIZE, 0);
+    message[str_len] = 0;
+    printf("서버로부터 전송된 메시지 : %s \n",message);
     //str_len = recv(sock, message, BUFSIZE, 0);
     // message[str_len] = 0;
     // printf("서버로부터 전송된 메시지 : %s \n",message);

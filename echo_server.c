@@ -6,7 +6,6 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<unistd.h>
-#define BUFSIZE 100
 
 void error_handling(char *message)
 {
@@ -19,18 +18,19 @@ int main(int argc, char**argv)
 {
   int serv_sock;
   int clnt_sock;
-  char message[BUFSIZE];
   int str_len;
 
   struct sockaddr_in serv_addr;
   struct sockaddr_in clnt_addr;
   int clnt_addr_size;
 
-  if(argc != 2)
+  if(argc != 3)
   {
-    printf("Usage : %s <port>\n", argv[0]);
+    printf("Usage : %s <port> <buffer_size>\n", argv[0]);
     exit(1);
   }
+  int buffer_size = atoi(argv[2]);
+  char message[buffer_size];
   serv_sock = socket(PF_INET,SOCK_STREAM, 0);
   if(serv_sock == -1)
     error_handling("socket() error");
@@ -54,7 +54,7 @@ int main(int argc, char**argv)
 
   sleep(5);
   /*데이터 수신 및 전송*/
-  while((str_len=recv(clnt_sock,message,BUFSIZE,0))!= 0){
+  while((str_len=recv(clnt_sock,message,buffer_size,0))!= 0){
     message[str_len]=0;
     printf("수신된 메시지 : %s \n",message);
     send(clnt_sock,message, str_len,0);
