@@ -1,15 +1,18 @@
+#include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netinet/in.h>
 #include<arpa/inet.h>
+#include<unistd.h>
 #define BUFSIZE 100
+#define MESSAGES 3
 
 void error_handling(char * message)
 {
   fputs(message, stderr);
-  fputc("\n",stderr);
+  fputs("\n",stderr);
   exit(1);
 }
 
@@ -17,6 +20,9 @@ int main(int argc, char**argv)
 {
   int sock;
   char message[BUFSIZE];
+  char message1[BUFSIZE] = "1234567890";
+  char message2[BUFSIZE] = "ABCDEFGHIJ";
+  char message3[BUFSIZE] = "KLMNOPQRST";
   int str_len;
   struct sockaddr_in serv_addr;
 
@@ -38,21 +44,35 @@ int main(int argc, char**argv)
   if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1)
     error_handling("connect() error!");
 
-  while(1)
+  send(sock, message1, strlen(message1), 0);
+  send(sock, message2, strlen(message2), 0);
+  send(sock, message3, strlen(message3), 0);
+  // 메시지 입력,전송
+  // fputs("전송할 메시지를 입력하세요(q to quit) : ",stdout);
+  //   fgets(message,BUFSIZE, stdin);
+  // if(!strcmp(message[i],"q\n")) break;
+  // send(sock, message[i], strlen(message[i]), 0);
+  //
+  // while()
+  // {
+  //   message[str_len] = 0;
+  //   printf("서버로부터 전송된 메시지 : %s \n",message);
+  // }
+  // 메시지 수신,출력
+  while((str_len = recv(sock, message, BUFSIZE, 0)) != 0)
   {
-    // 메시지 입력,전송
+    message[str_len] = 0;
+    printf("서버로부터 전송된 메시지 : %s \n",message);
     fputs("전송할 메시지를 입력하세요(q to quit) : ",stdout);
     fgets(message,BUFSIZE, stdin);
-
     if(!strcmp(message,"q\n")) break;
-    write(sock, message, strlen(message));
-
-    // 메시지 수신,출력
-    str_len=read(sock, message, BUFSIZE-1);
-    message[str_len]=0;
-    printf("서버로부터 전송된 메시지 : %s \n",message);
+    send(sock, message, strlen(message), 0);
+    //str_len = recv(sock, message, BUFSIZE, 0);
+    // message[str_len] = 0;
+    // printf("서버로부터 전송된 메시지 : %s \n",message);
 
   }
+
   close(sock);
   return 0;
 }
