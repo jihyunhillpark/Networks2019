@@ -7,7 +7,6 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #define BUFSIZE 100
-#define MESSAGES 3
 
 void error_handling(char * message)
 {
@@ -52,15 +51,6 @@ int main(int argc, char**argv)
   send(sock, message2, strlen(message2), 0);
   send(sock, message3, strlen(message3), 0);
 
-  for(i = 0 ; i < 3 ; i++)
-  {
-      addr_size = sizeof(from_addr);
-      str_len = recvfrom(sock, message, BUFSIZE, 0,
-                (struct sockadrr*)&from_addr, &addr_size);
-      message[str_len] = 0;
-      printf("서버로 보낸 메시지 : %s \n", message);
-  }
-
   while(1)
   {
       fputs("전송할 메시지를 입력하세요(q to quit):",stdout);
@@ -70,10 +60,17 @@ int main(int argc, char**argv)
       send(sock, message, strlen(message), 0);
       str_len = recv(sock, message, BUFSIZE, 0);
       message[str_len] = 0;
-      printf("서버로부터 전송된 메시지 :%s \n", message);
-
   }
-  send(sock, message, 0, 0);
+  while(1)
+  {
+        struct timeval tv;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+        if(0 < setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval))) break;
+        send(sock, message, 0, 0);
+        str_len=recv(sock, message, BUFSIZE, 0);
+        if(str_len) break;
+  }
   close(sock);
   return 0;
 }

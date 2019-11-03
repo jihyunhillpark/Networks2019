@@ -6,7 +6,6 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<unistd.h>
-#define MESSAGES 3
 
 void error_handling(char * message)
 {
@@ -43,19 +42,18 @@ int main(int argc, char**argv)
   if(bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1)
     error_handling("bind() error");
 
-
   sleep(5);
+  
   while(1)
   {
     clnt_addr_size = sizeof(clnt_addr);
     memset(&message, 0, sizeof(message));
     str_len = recvfrom(serv_sock, message, buffer_size,0
               ,(struct sockaddr*)&clnt_addr, &clnt_addr_size);
+    sendto(serv_sock, message, str_len, 0 ,(struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
     /*받은 데이터의 길이가 0 즉, eof일 때 종료한다.*/
     if(str_len == 0) break;
     printf("수신 내용 : %s \n", message);
-    printf("수신 길이 : %d \n", str_len);
-    sendto(serv_sock, message, str_len, 0 ,(struct sockaddr*)&clnt_addr, sizeof(clnt_addr)) ;
   }
   close(serv_sock);
   return 0;
