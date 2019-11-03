@@ -48,15 +48,6 @@ int main(int argc, char**argv)
   send(sock, message2, strlen(message2), 0);
   send(sock, message3, strlen(message3), 0);
   // 메시지 입력,전송
-  // fputs("전송할 메시지를 입력하세요(q to quit) : ",stdout);
-  //   fgets(message,BUFSIZE, stdin);
-  // if(!strcmp(message[i],"q\n")) break;
-  // send(sock, message[i], strlen(message[i]), 0);
-  //
-  // 메시지 수신,출력
-  // str_len = recv(sock, message, BUFSIZE, 0);
-  // message[str_len] = 0;
-  // printf("서버로부터 전송된 메시지 : %s \n",message);
   while(1)
   {
 
@@ -67,13 +58,9 @@ int main(int argc, char**argv)
 
     str_len = recv(sock, message, BUFSIZE, 0);
     message[str_len] = 0;
-    printf("서버로부터 전송된 메시지 : %s \n",message);
-    //str_len = recv(sock, message, BUFSIZE, 0);
-    // message[str_len] = 0;
-    // printf("서버로부터 전송된 메시지 : %s \n",message);
-
   }
 
+  shutdown(sock,1);
   close(sock);
   return 0;
 }

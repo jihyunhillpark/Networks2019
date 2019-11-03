@@ -58,8 +58,6 @@ int main(int argc, char**argv)
     message[str_len]=0;
     printf("수신된 메시지 : %s \n",message);
     send(clnt_sock,message, str_len,0);
-    //send(1, message, str_len,0);
-    //memset(&message, 0, sizeof(message));
   }
   close(clnt_sock);
   return 0;
