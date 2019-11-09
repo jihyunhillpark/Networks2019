@@ -20,7 +20,7 @@ int main(int argc, char**argv)
   int serv_sock;
   int clnt_sock;
   int str_len;
-  char message[BUFFSIZE];
+  char message[1024];
   struct sockaddr_in serv_addr;
   struct sockaddr_in clnt_addr;
   int clnt_addr_size;
@@ -54,18 +54,31 @@ int main(int argc, char**argv)
     error_handling("accept() error");
 
   recv(clnt_sock,message,sizeof(int),0);
-  int file_length = atoi (message);
-  recv(clnt_sock,message,file_length,0);
-  message[file_length] = 0;
-  fp = fopen(message,"wb");
+	printf("1. %s\n", message);
 
+  int file_length = atoi (message);
+  char filename[file_length];
+  recv(clnt_sock,filename,sizeof(filename),0);
+  printf("2. %d %s\n", strlen(filename), filename);
+
+  fp = fopen(filename,"wb");
+  memset(message, 0, sizeof(message));
+  int i = 1;
   /*데이터 수신 및 전송*/
-  while((str_len=recv(clnt_sock,message,BUFFSIZE,0))!= 0){
-    message[str_len]=0;
-    fputs(message,fp);
+  while(1)
+  {
+        memset(message, 0, BUFFSIZE);
+        str_len=recv(clnt_sock,message,BUFFSIZE,0);
+        if(str_len <= 0 )break;
+        //message[str_len] = 0;
+	printf("%d packet %d\n",i, str_len);
+	//fprintf(fp,"%s",message);
+        fwrite(message, sizeof(char), str_len, fp);
+	//memset(message, 0, BUFFSIZE);
+        i++;
   }
-  fclose(fp);
   close(clnt_sock);
+  fclose(fp);
   return 0;
 
 }

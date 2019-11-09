@@ -16,13 +16,14 @@ void error_handling(char * message)
 struct dtgram
 {
   int seq;
-  char data[1024];
+  char data[1025];
 };
 int main(int argc, char**argv)
 {
   int serv_sock;
   int str_len, num = 0;
   struct dtgram message;
+  char buffer[1025];
 
   struct sockaddr_in serv_addr;
   struct sockaddr_in clnt_addr;
@@ -53,25 +54,27 @@ int main(int argc, char**argv)
     memset((char *)&message, 0, sizeof(struct dtgram));
     str_len = recvfrom(serv_sock ,(char *)&message, sizeof(struct dtgram), 0
               ,(struct sockaddr*)&clnt_addr, &clnt_addr_size);
-    if(str_len == 0) break;
     sendto(serv_sock, (char *)&message, str_len, 0 ,(struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
-    /*받은 데이터의 길이가 0 즉, eof일 때 종료한다.*/
-    // printf("수신 내용 : %d \n", message.seq);
-    // printf("수신 내용 : %s \n", message.data);
-    // printf("수신 내용 : %d \n", strlen(message.data));
+
     if(message.seq == 0)
     {
         int title_length = strlen(message.data);
         char title[title_length + 1];
         strncpy(title, message.data, title_length);
         title[title_length] = 0;
-        printf("복사된 내용 %s, %d", title, title_length);
         fp = fopen(title,"wb");
+	break;
     }
-    else if(message.seq > 0)
-    {
-        fputs(message.data,fp);
-    }
+  }
+
+  while(1)
+  {
+    clnt_addr_size = sizeof(clnt_addr);
+    memset(buffer, 0, sizeof(buffer));
+    str_len = recvfrom(serv_sock ,buffer, sizeof(buffer), 0
+              ,(struct sockaddr*)&clnt_addr, &clnt_addr_size);
+    if(str_len == 0) break;
+    fprintf(fp,"%s",buffer);
   }
   fclose(fp);
   close(serv_sock);

@@ -26,7 +26,7 @@ int main(int argc, char**argv)
   int str_len, addr_size, i;
   FILE* fp;
   int count = 1;
-
+  char buffer[1024];
   struct sockaddr_in serv_addr;
   struct sockaddr_in from_addr;
 
@@ -54,7 +54,10 @@ int main(int argc, char**argv)
     strncpy(message.data,argv[3],strlen(argv[3]));
     message.seq = 0;
     while(1)
-    {
+    {  struct timeval tv;
+       tv.tv_sec = 3;
+       tv.tv_usec = 0;
+       if(0 < setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval))) send(sock, (char *)&message, sizeof(struct dtgram), 0);
        send(sock, (char *)&message, sizeof(struct dtgram), 0);
        recv(sock, (char *)&message, sizeof(struct dtgram), 0);
        if( message.seq == 0 ) break;
@@ -62,14 +65,13 @@ int main(int argc, char**argv)
   }
   else
     printf("There is no such file name\n");
-
-  while(fgets(message.data, sizeof(struct dtgram) - sizeof(int),fp))
+//파일 내용 전송
+  while(fread(buffer, sizeof(char),sizeof(buffer),fp))
   {
-    message.seq = count;
-    send(sock, (char *)&message, sizeof(struct dtgram), 0);
-    count++;
+    send(sock, buffer, sizeof(buffer), 0);
   }
-  send(sock, (char *)&message,fclose(fp), 0);
+  send(sock, buffer,sizeof(buffer), 0);
   close(sock);
+  fclose(fp);
   return 0;
 }

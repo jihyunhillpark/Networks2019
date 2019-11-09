@@ -6,6 +6,7 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<unistd.h>
+#define BUFSIZE 1024
 
 void error_handling(char * message)
 {
@@ -17,12 +18,12 @@ void error_handling(char * message)
 int main(int argc, char**argv)
 {
   int sock;
-  char *buffer;
-  char message[1024];
+  char buffer[BUFSIZE];
+  char message[BUFSIZE];
   int str_len;
   struct sockaddr_in serv_addr;
   FILE *fp;
-  int size;
+  int size = 0;
 
   if(argc!=4)
   {
@@ -47,26 +48,25 @@ int main(int argc, char**argv)
   if((fp = fopen(argv[3], "rb")) != NULL)
   {
     sprintf(message, "%d",strlen(argv[3]));
-    printf("buffer size %s\n", message);
     send(sock, message, sizeof(int) ,0 );
     send(sock, argv[3], strlen(argv[3]), 0);
   }
   else
     printf("파일이 존재하지 않습니다!\n");
-
-  //파일 읽어들이
-  fseek(fp, 0,SEEK_END);
-  size = ftell(fp);
-
-  buffer = malloc(size + 1);
-  memset(buffer,0,size + 1);
-
-  fseek(fp, 0 ,SEEK_SET);
-  fread(buffer, size, 1 ,fp);
-
-  //파일 전송하기
-  send(sock,buffer,strlen(buffer),0);
-
+  int i = 1;
+  //int size = 0;
+  while(1)
+  {
+    memset(buffer, 0, sizeof(buffer));
+    size = fread(buffer, sizeof(char), BUFSIZE-1 ,fp);
+    //strcpy(buffer,ch);
+    if( size <= 0 ) break;
+    printf(" %dth, %d fread size ",i,size );
+    size = send(sock, buffer, strlen(buffer), 0);	// 읽은 내용 출력
+    printf("%dth packet data length  %d\n\n", i, size);
+    i++;                                //파일 전송하기
+  }
   close(sock);
+  fclose(fp);
   return 0;
 }
