@@ -291,11 +291,7 @@ int main(int argc, char**argv)
     printf("\n--------------------\n\n");
 
     free(message);
-
   }
-
-  shutdown(sock,1);
   close(sock);
   return 0;
-
 }
